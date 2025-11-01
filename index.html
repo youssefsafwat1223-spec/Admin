@@ -1,96 +1,151 @@
 <!DOCTYPE html>
 <html lang="ar" dir="rtl">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>لوحة طلبات الاستئذان</title>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>📋 لوحة طلبات الاستئذان</title>
   <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    document.addEventListener('DOMContentLoaded', async () => {
+      const sheetId = "1im7B1quJaICfownQ9Lbky7jDSNCd_N5EYRAx3H_UdRg";
+      const gid = "0";
+      const url = `https://docs.google.com/spreadsheets/d/${sheetId}/gviz/tq?tqx=out:json&gid=${gid}`;
+
+      const loadingEl = document.getElementById('loading');
+      const tableBody = document.getElementById('table-body');
+      const statsEl = document.getElementById('stats');
+      const filterButtons = document.querySelectorAll('.filter-btn');
+      let allRequests = [];
+      let currentFilter = 'all';
+
+      async function fetchData() {
+        loadingEl.classList.remove('hidden');
+        tableBody.innerHTML = '';
+        try {
+          const res = await fetch(url);
+          const text = await res.text();
+          const jsonText = text.substring(text.indexOf('{'), text.lastIndexOf('}') + 1);
+          const data = JSON.parse(jsonText).table;
+          const cols = data.cols.map(c => c.label);
+          const rows = data.rows.map(r => r.c.map(cell => cell ? cell.v : ''));
+
+          // تحويل الصفوف إلى كائنات
+          allRequests = rows.map(r => ({
+            requestId: r[0],
+            studentName: r[1],
+            studentId: r[2],
+            grade: r[3],
+            section: r[4],
+            phone: r[5],
+            reason: r[6],
+            datetime: r[7],
+            status: r[8] || 'Pending',
+            response: r[9] || '',
+            responseDate: r[10] || ''
+          }));
+
+          updateDashboard();
+        } catch (err) {
+          document.getElementById('error').textContent = '⚠️ حدث خطأ أثناء تحميل البيانات: ' + err.message;
+        } finally {
+          loadingEl.classList.add('hidden');
+        }
+      }
+
+      function updateDashboard() {
+        let filtered = allRequests;
+        if (currentFilter !== 'all') {
+          filtered = allRequests.filter(r => r.status === currentFilter);
+        }
+
+        // تحديث الإحصائيات
+        const total = allRequests.length;
+        const pending = allRequests.filter(r => r.status === 'Pending').length;
+        const approved = allRequests.filter(r => r.status === 'Approved').length;
+        const rejected = allRequests.filter(r => r.status === 'Rejected').length;
+
+        statsEl.innerHTML = `
+          <div class="flex flex-wrap gap-4 justify-center mt-4">
+            <div class="bg-yellow-100 text-yellow-800 px-6 py-3 rounded-xl shadow-md">قيد الانتظار: <b>${pending}</b></div>
+            <div class="bg-green-100 text-green-800 px-6 py-3 rounded-xl shadow-md">موافق عليها: <b>${approved}</b></div>
+            <div class="bg-red-100 text-red-800 px-6 py-3 rounded-xl shadow-md">مرفوضة: <b>${rejected}</b></div>
+            <div class="bg-blue-100 text-blue-800 px-6 py-3 rounded-xl shadow-md">الإجمالي: <b>${total}</b></div>
+          </div>
+        `;
+
+        // عرض البيانات
+        tableBody.innerHTML = filtered.map(r => `
+          <tr class="border-b hover:bg-gray-50 transition">
+            <td class="py-2 font-bold text-gray-700">${r.studentName}</td>
+            <td class="py-2">${r.studentId}</td>
+            <td class="py-2">${r.grade}</td>
+            <td class="py-2">${r.section}</td>
+            <td class="py-2">${r.phone}</td>
+            <td class="py-2">${r.reason}</td>
+            <td class="py-2">${r.datetime}</td>
+            <td class="py-2">
+              ${r.status === 'Pending' ? '<span class="bg-yellow-100 text-yellow-700 px-3 py-1 rounded-full text-sm">قيد الانتظار</span>'
+              : r.status === 'Approved' ? '<span class="bg-green-100 text-green-700 px-3 py-1 rounded-full text-sm">موافق عليه</span>'
+              : '<span class="bg-red-100 text-red-700 px-3 py-1 rounded-full text-sm">مرفوض</span>'}
+            </td>
+            <td class="py-2">${r.response || '-'}</td>
+            <td class="py-2">${r.responseDate || '-'}</td>
+          </tr>
+        `).join('');
+      }
+
+      // فلترة
+      filterButtons.forEach(btn => {
+        btn.addEventListener('click', () => {
+          currentFilter = btn.dataset.filter;
+          filterButtons.forEach(b => b.classList.remove('bg-indigo-600', 'text-white'));
+          btn.classList.add('bg-indigo-600', 'text-white');
+          updateDashboard();
+        });
+      });
+
+      // تحديث تلقائي كل دقيقة
+      fetchData();
+      setInterval(fetchData, 60000);
+    });
+  </script>
 </head>
-<body class="bg-gray-50 text-gray-800 font-sans">
+<body class="bg-gray-50 min-h-screen p-6">
+  <div class="max-w-6xl mx-auto">
+    <h1 class="text-3xl font-extrabold text-center text-indigo-700 mb-2">📋 لوحة طلبات الاستئذان</h1>
+    <p class="text-center text-gray-600 mb-6">عرض مباشر للطلبات من Google Sheets (يُحدّث تلقائيًا كل دقيقة)</p>
 
-  <!-- العنوان الرئيسي -->
-  <header class="bg-indigo-600 text-white py-6 shadow-md">
-    <div class="max-w-6xl mx-auto px-4">
-      <h1 class="text-3xl font-bold mb-1">لوحة طلبات الاستئذان</h1>
-      <p class="text-indigo-200">إدارة ومراجعة طلبات استئذان الطلاب</p>
-    </div>
-  </header>
+    <div id="stats" class="text-center mb-6"></div>
 
-  <main class="max-w-6xl mx-auto p-6">
-
-    <!-- الإحصائيات -->
-    <div class="grid grid-cols-1 sm:grid-cols-4 gap-4 mb-8">
-      <div class="bg-white shadow rounded-lg p-4 text-center border border-gray-100">
-        <p class="text-gray-500">إجمالي الطلبات</p>
-        <p class="text-2xl font-bold text-indigo-600">32</p>
-      </div>
-      <div class="bg-yellow-100 shadow rounded-lg p-4 text-center border border-yellow-200">
-        <p class="text-gray-700">قيد الانتظار</p>
-        <p class="text-2xl font-bold text-yellow-600">10</p>
-      </div>
-      <div class="bg-green-100 shadow rounded-lg p-4 text-center border border-green-200">
-        <p class="text-gray-700">موافق عليها</p>
-        <p class="text-2xl font-bold text-green-600">18</p>
-      </div>
-      <div class="bg-red-100 shadow rounded-lg p-4 text-center border border-red-200">
-        <p class="text-gray-700">مرفوضة</p>
-        <p class="text-2xl font-bold text-red-600">4</p>
-      </div>
+    <div class="flex justify-center gap-2 mb-4">
+      <button class="filter-btn bg-indigo-600 text-white px-4 py-2 rounded-lg font-medium" data-filter="all">الكل</button>
+      <button class="filter-btn bg-gray-200 px-4 py-2 rounded-lg font-medium" data-filter="Pending">قيد الانتظار</button>
+      <button class="filter-btn bg-gray-200 px-4 py-2 rounded-lg font-medium" data-filter="Approved">موافق عليها</button>
+      <button class="filter-btn bg-gray-200 px-4 py-2 rounded-lg font-medium" data-filter="Rejected">مرفوضة</button>
     </div>
 
-    <!-- أزرار الفلترة -->
-    <div class="flex flex-wrap gap-2 mb-6">
-      <button class="bg-indigo-600 text-white px-4 py-2 rounded-lg font-semibold">الكل (32)</button>
-      <button class="bg-yellow-500 text-white px-4 py-2 rounded-lg font-semibold">قيد الانتظار (10)</button>
-      <button class="bg-green-500 text-white px-4 py-2 rounded-lg font-semibold">موافق عليها (18)</button>
-      <button class="bg-red-500 text-white px-4 py-2 rounded-lg font-semibold">مرفوضة (4)</button>
+    <p id="error" class="text-red-600 text-center font-semibold"></p>
+    <div id="loading" class="text-center text-indigo-700 font-semibold mb-3 hidden">⏳ جاري تحميل البيانات...</div>
+
+    <div class="overflow-x-auto shadow-md rounded-lg bg-white">
+      <table class="min-w-full text-sm text-right text-gray-700">
+        <thead class="bg-indigo-100">
+          <tr>
+            <th class="py-2 px-3">اسم الطالب</th>
+            <th class="py-2 px-3">رقم الطالب</th>
+            <th class="py-2 px-3">الصف</th>
+            <th class="py-2 px-3">الفصل</th>
+            <th class="py-2 px-3">الجوال</th>
+            <th class="py-2 px-3">السبب</th>
+            <th class="py-2 px-3">التاريخ</th>
+            <th class="py-2 px-3">الحالة</th>
+            <th class="py-2 px-3">رد المديرة</th>
+            <th class="py-2 px-3">تاريخ الرد</th>
+          </tr>
+        </thead>
+        <tbody id="table-body"></tbody>
+      </table>
     </div>
-
-    <!-- الطلبات -->
-    <div class="space-y-6">
-      
-      <!-- طلب فردي -->
-      <div class="bg-white p-6 rounded-2xl shadow border border-gray-100">
-        <div class="flex justify-between items-center mb-3">
-          <h2 class="text-xl font-bold text-indigo-700">محمد أحمد</h2>
-          <span class="bg-yellow-100 text-yellow-800 px-3 py-1 rounded-lg text-sm border border-yellow-300">
-            قيد الانتظار
-          </span>
-        </div>
-        <p><strong>رقم الطالب:</strong> 123456789</p>
-        <p><strong>الصف:</strong> رابع ابتدائي - <strong>الفصل:</strong> 2</p>
-        <p><strong>الجوال:</strong> 0501234567</p>
-        <p><strong>التاريخ:</strong> 2025-11-01 09:30</p>
-        <p><strong>رقم الطلب:</strong> stu123456789001</p>
-        <p class="mt-3"><strong>سبب الاستئذان:</strong> موعد طبي في المستشفى</p>
-
-        <div class="flex gap-4 mt-5">
-          <button class="flex-1 bg-green-500 hover:bg-green-600 text-white font-bold py-2 rounded-lg transition">موافقة</button>
-          <button class="flex-1 bg-red-500 hover:bg-red-600 text-white font-bold py-2 rounded-lg transition">رفض</button>
-        </div>
-      </div>
-
-      <!-- مثال آخر Approved -->
-      <div class="bg-white p-6 rounded-2xl shadow border border-gray-100">
-        <div class="flex justify-between items-center mb-3">
-          <h2 class="text-xl font-bold text-indigo-700">سارة خالد</h2>
-          <span class="bg-green-100 text-green-800 px-3 py-1 rounded-lg text-sm border border-green-300">
-            موافق عليه
-          </span>
-        </div>
-        <p><strong>رقم الطالب:</strong> 987654321</p>
-        <p><strong>الصف:</strong> ثالث متوسط - <strong>الفصل:</strong> 1</p>
-        <p><strong>الجوال:</strong> 0509876543</p>
-        <p><strong>التاريخ:</strong> 2025-11-01 11:00</p>
-        <p><strong>رقم الطلب:</strong> stu987654321001</p>
-        <p class="mt-3"><strong>سبب الاستئذان:</strong> ظرف عائلي طارئ</p>
-
-        <p class="mt-4 text-green-700"><strong>الرد:</strong> تم الموافقة ✅</p>
-        <p class="text-sm text-gray-500">تاريخ الرد: 2025-11-01 11:15</p>
-      </div>
-
-    </div>
-  </main>
-
+  </div>
 </body>
 </html>
