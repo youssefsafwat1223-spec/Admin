@@ -5,491 +5,465 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>🏫 نظام إدارة طلبات الاستئذان</title>
 <style>
-* {
-    margin: 0;
-    padding: 0;
-    box-sizing: border-box;
-}
-
-body {
-    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-    min-height: 100vh;
-    padding: 20px;
-    color: #333;
-}
-
-.container {
-    max-width: 1400px;
-    margin: 0 auto;
-}
-
-/* Header */
-.header {
-    background: linear-gradient(135deg, #fff 0%, #f8f9fa 100%);
-    padding: 40px;
-    border-radius: 20px;
-    box-shadow: 0 15px 40px rgba(0,0,0,0.25);
-    margin-bottom: 30px;
-    text-align: center;
-    border-top: 5px solid #667eea;
-    position: relative;
-    overflow: hidden;
-}
-
-.header::before {
-    content: '';
-    position: absolute;
-    top: 0;
-    left: 0;
-    right: 0;
-    height: 5px;
-    background: linear-gradient(90deg, #667eea, #764ba2, #667eea);
-    background-size: 200% 100%;
-    animation: shimmer 3s infinite;
-}
-
-@keyframes shimmer {
-    0% { background-position: 0% 50%; }
-    50% { background-position: 100% 50%; }
-    100% { background-position: 0% 50%; }
-}
-
-.school-logo {
-    font-size: 4em;
-    margin-bottom: 15px;
-    animation: float 3s ease-in-out infinite;
-}
-
-@keyframes float {
-    0%, 100% { transform: translateY(0px); }
-    50% { transform: translateY(-10px); }
-}
-
-.header h1 {
-    color: #667eea;
-    font-size: 2.8em;
-    margin-bottom: 10px;
-    font-weight: 800;
-    text-shadow: 2px 2px 4px rgba(0,0,0,0.1);
-}
-
-.header p {
-    color: #666;
-    font-size: 1.2em;
-    font-weight: 500;
-}
-
-/* Stats Cards */
-.stats {
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
-    gap: 25px;
-    margin-bottom: 30px;
-}
-
-.stat-card {
-    background: linear-gradient(135deg, #fff 0%, #f8f9fa 100%);
-    padding: 30px;
-    border-radius: 15px;
-    box-shadow: 0 8px 25px rgba(0,0,0,0.15);
-    text-align: center;
-    cursor: pointer;
-    transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
-    border-top: 4px solid #667eea;
-    position: relative;
-    overflow: hidden;
-}
-
-.stat-card::before {
-    content: '';
-    position: absolute;
-    top: 0;
-    left: -100%;
-    width: 100%;
-    height: 100%;
-    background: linear-gradient(90deg, transparent, rgba(102,126,234,0.1), transparent);
-    transition: 0.5s;
-}
-
-.stat-card:hover::before {
-    left: 100%;
-}
-
-.stat-card:hover {
-    transform: translateY(-10px) scale(1.02);
-    box-shadow: 0 15px 40px rgba(102,126,234,0.3);
-}
-
-.stat-card h3 {
-    font-size: 3em;
-    color: #667eea;
-    margin-bottom: 10px;
-    font-weight: 800;
-}
-
-.stat-card p {
-    color: #666;
-    font-size: 1.15em;
-    font-weight: 600;
-}
-
-/* Requests Container */
-.requests-container {
-    background: white;
-    padding: 35px;
-    border-radius: 20px;
-    box-shadow: 0 15px 40px rgba(0,0,0,0.2);
-}
-
-/* Filter Buttons */
-.filter-buttons {
-    display: flex;
-    gap: 15px;
-    margin-bottom: 30px;
-    flex-wrap: wrap;
-}
-
-.filter-btn {
-    padding: 14px 28px;
-    border: none;
-    border-radius: 10px;
-    font-size: 1.05em;
-    cursor: pointer;
-    transition: all 0.3s ease;
-    font-weight: 700;
-    position: relative;
-    overflow: hidden;
-}
-
-.filter-btn.active {
-    background: linear-gradient(135deg, #667eea, #764ba2);
-    color: white;
-    box-shadow: 0 8px 20px rgba(102,126,234,0.4);
-    transform: translateY(-2px);
-}
-
-.filter-btn:not(.active) {
-    background: #f0f0f0;
-    color: #666;
-}
-
-.filter-btn:hover {
-    transform: translateY(-3px);
-    box-shadow: 0 5px 15px rgba(0,0,0,0.15);
-}
-
-/* Request Cards */
-.request-card {
-    background: linear-gradient(135deg, #f9f9f9 0%, #fff 100%);
-    padding: 30px;
-    border-radius: 15px;
-    margin-bottom: 25px;
-    border-right: 6px solid #667eea;
-    transition: all 0.5s ease;
-    box-shadow: 0 5px 15px rgba(0,0,0,0.08);
-    position: relative;
-    overflow: hidden;
-}
-
-.request-card.removing {
-    animation: slideOut 0.6s ease forwards;
-}
-
-@keyframes slideOut {
-    0% {
-        opacity: 1;
-        transform: translateX(0) scale(1);
+    * {margin:0;padding:0;box-sizing:border-box;}
+    body {
+        font-family:'Segoe UI',Tahoma,Geneva,Verdana,sans-serif;
+        background: linear-gradient(135deg,#667eea 0%,#764ba2 100%);
+        min-height:100vh;
+        padding:20px;
+        color:#333;
     }
-    100% {
-        opacity: 0;
-        transform: translateX(-100px) scale(0.8);
-        height: 0;
-        padding: 0;
-        margin: 0;
+    .container {max-width:1400px;margin:0 auto;}
+    
+    /* Header مع شعار المدرسة */
+    .header {
+        background:linear-gradient(135deg,#fff 0%,#f8f9fa 100%);
+        padding:40px;
+        border-radius:20px;
+        box-shadow:0 15px 40px rgba(0,0,0,0.25);
+        margin-bottom:30px;
+        text-align:center;
+        border-top:5px solid #667eea;
+        position:relative;
+        overflow:hidden;
     }
-}
-
-.request-card:hover {
-    box-shadow: 0 12px 35px rgba(102,126,234,0.2);
-    transform: translateX(-8px) translateY(-3px);
-}
-
-.request-header {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    margin-bottom: 20px;
-    flex-wrap: wrap;
-    gap: 15px;
-}
-
-.student-info h3 {
-    color: #333;
-    font-size: 1.6em;
-    margin-bottom: 8px;
-    font-weight: 700;
-}
-
-.student-info p {
-    color: #666;
-    font-size: 1em;
-    font-weight: 500;
-}
-
-/* Status Badge */
-.status-badge {
-    padding: 10px 25px;
-    border-radius: 25px;
-    font-weight: 700;
-    font-size: 0.95em;
-    box-shadow: 0 4px 12px rgba(0,0,0,0.1);
-}
-
-.status-pending {
-    background: linear-gradient(135deg, #ffeaa7, #fdcb6e);
-    color: #d63031;
-}
-
-.status-approved {
-    background: linear-gradient(135deg, #55efc4, #00b894);
-    color: #00693e;
-}
-
-.status-rejected {
-    background: linear-gradient(135deg, #ff7675, #d63031);
-    color: #fff;
-}
-
-/* Request Details */
-.request-details {
-    background: white;
-    padding: 20px;
-    border-radius: 12px;
-    margin-bottom: 20px;
-    box-shadow: inset 0 2px 8px rgba(0,0,0,0.05);
-}
-
-.detail-row {
-    display: flex;
-    margin-bottom: 12px;
-    font-size: 1.05em;
-    padding: 8px 0;
-    border-bottom: 1px solid #f0f0f0;
-}
-
-.detail-row:last-child {
-    border-bottom: none;
-}
-
-.detail-label {
-    font-weight: 700;
-    color: #667eea;
-    min-width: 180px;
-}
-
-.detail-value {
-    color: #333;
-    flex: 1;
-    font-weight: 500;
-}
-
-/* Action Buttons */
-.action-buttons {
-    display: flex;
-    gap: 15px;
-    flex-wrap: wrap;
-}
-
-.btn {
-    padding: 14px 35px;
-    border: none;
-    border-radius: 10px;
-    font-size: 1.05em;
-    cursor: pointer;
-    transition: all 0.3s ease;
-    font-weight: 700;
-    box-shadow: 0 5px 15px rgba(0,0,0,0.1);
-    flex: 1;
-    min-width: 150px;
-}
-
-.btn:disabled {
-    opacity: 0.5;
-    cursor: not-allowed;
-}
-
-.btn-approve {
-    background: linear-gradient(135deg, #00b894, #00cec9);
-    color: white;
-}
-
-.btn-approve:hover:not(:disabled) {
-    background: linear-gradient(135deg, #00a085, #00b8a9);
-    transform: translateY(-3px);
-    box-shadow: 0 8px 20px rgba(0,184,148,0.4);
-}
-
-.btn-reject {
-    background: linear-gradient(135deg, #d63031, #e17055);
-    color: white;
-}
-
-.btn-reject:hover:not(:disabled) {
-    background: linear-gradient(135deg, #c0281f, #d65643);
-    transform: translateY(-3px);
-    box-shadow: 0 8px 20px rgba(214,48,49,0.4);
-}
-
-/* Refresh Button */
-.refresh-btn {
-    position: fixed;
-    bottom: 30px;
-    left: 30px;
-    width: 70px;
-    height: 70px;
-    border-radius: 50%;
-    background: linear-gradient(135deg, #667eea, #764ba2);
-    color: white;
-    border: none;
-    font-size: 1.8em;
-    cursor: pointer;
-    box-shadow: 0 8px 25px rgba(102,126,234,0.5);
-    transition: all 0.3s ease;
-    z-index: 1000;
-}
-
-.refresh-btn:hover {
-    transform: rotate(180deg) scale(1.15);
-    box-shadow: 0 12px 35px rgba(102,126,234,0.6);
-}
-
-.refresh-btn.spinning {
-    animation: spin 1s linear infinite;
-}
-
-@keyframes spin {
-    from { transform: rotate(0deg); }
-    to { transform: rotate(360deg); }
-}
-
-/* Toast Notifications */
-.toast {
-    position: fixed;
-    top: 20px;
-    right: 20px;
-    background: white;
-    padding: 20px 30px;
-    border-radius: 12px;
-    box-shadow: 0 10px 40px rgba(0,0,0,0.3);
-    z-index: 2000;
-    display: none;
-    font-weight: 600;
-    font-size: 1.05em;
-    max-width: 400px;
-}
-
-.toast.show {
-    display: block;
-    animation: toastIn 0.5s ease;
-}
-
-.toast.success {
-    border-right: 5px solid #00b894;
-}
-
-.toast.error {
-    border-right: 5px solid #d63031;
-}
-
-@keyframes toastIn {
-    from {
-        transform: translateX(500px);
-        opacity: 0;
+    .header::before {
+        content:'';
+        position:absolute;
+        top:0;
+        left:0;
+        right:0;
+        height:5px;
+        background:linear-gradient(90deg,#667eea,#764ba2,#667eea);
+        background-size:200% 100%;
+        animation:shimmer 3s infinite;
     }
-    to {
-        transform: translateX(0);
-        opacity: 1;
+    @keyframes shimmer {
+        0%{background-position:0% 50%;}
+        50%{background-position:100% 50%;}
+        100%{background-position:0% 50%;}
     }
-}
-
-/* Loading & No Requests */
-.loading {
-    text-align: center;
-    padding: 60px;
-    font-size: 1.4em;
-    color: #667eea;
-    font-weight: 600;
-}
-
-.loading::after {
-    content: '...';
-    animation: dots 1.5s infinite;
-}
-
-@keyframes dots {
-    0%, 20% { content: '.'; }
-    40% { content: '..'; }
-    60%, 100% { content: '...'; }
-}
-
-.no-requests {
-    text-align: center;
-    padding: 80px;
-    color: #999;
-    font-size: 1.4em;
-    font-weight: 600;
-}
-
-/* Auto-refresh Indicator */
-.auto-refresh-indicator {
-    position: fixed;
-    bottom: 110px;
-    left: 30px;
-    background: rgba(102,126,234,0.95);
-    color: white;
-    padding: 12px 20px;
-    border-radius: 25px;
-    font-size: 0.9em;
-    font-weight: 600;
-    box-shadow: 0 5px 15px rgba(0,0,0,0.2);
-    animation: fadeInOut 2s ease-in-out infinite;
-}
-
-@keyframes fadeInOut {
-    0%, 100% { opacity: 0.7; }
-    50% { opacity: 1; }
-}
-
-/* Responsive */
-@media (max-width: 768px) {
-    .header h1 { font-size: 2em; }
-    .school-logo { font-size: 3em; }
+    .school-logo {
+        font-size:4em;
+        margin-bottom:15px;
+        animation:float 3s ease-in-out infinite;
+    }
+    @keyframes float {
+        0%,100%{transform:translateY(0px);}
+        50%{transform:translateY(-10px);}
+    }
+    .header h1 {
+        color:#667eea;
+        font-size:2.8em;
+        margin-bottom:10px;
+        font-weight:800;
+        text-shadow:2px 2px 4px rgba(0,0,0,0.1);
+    }
+    .header p {
+        color:#666;
+        font-size:1.2em;
+        font-weight:500;
+    }
+    
+    /* بطاقات الإحصائيات */
+    .stats {
+        display:grid;
+        grid-template-columns:repeat(auto-fit,minmax(220px,1fr));
+        gap:25px;
+        margin-bottom:30px;
+    }
+    .stat-card {
+        background:linear-gradient(135deg,#fff 0%,#f8f9fa 100%);
+        padding:30px;
+        border-radius:15px;
+        box-shadow:0 8px 25px rgba(0,0,0,0.15);
+        text-align:center;
+        cursor:pointer;
+        transition:all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+        border-top:4px solid #667eea;
+        position:relative;
+        overflow:hidden;
+    }
+    .stat-card::before {
+        content:'';
+        position:absolute;
+        top:0;
+        left:-100%;
+        width:100%;
+        height:100%;
+        background:linear-gradient(90deg,transparent,rgba(102,126,234,0.1),transparent);
+        transition:0.5s;
+    }
+    .stat-card:hover::before {
+        left:100%;
+    }
+    .stat-card:hover {
+        transform:translateY(-10px) scale(1.02);
+        box-shadow:0 15px 40px rgba(102,126,234,0.3);
+    }
+    .stat-card h3 {
+        font-size:3em;
+        color:#667eea;
+        margin-bottom:10px;
+        font-weight:800;
+        text-shadow:2px 2px 4px rgba(0,0,0,0.05);
+    }
+    .stat-card p {
+        color:#666;
+        font-size:1.15em;
+        font-weight:600;
+    }
+    
+    /* حاوية الطلبات */
+    .requests-container {
+        background:white;
+        padding:35px;
+        border-radius:20px;
+        box-shadow:0 15px 40px rgba(0,0,0,0.2);
+    }
+    
+    /* أزرار الفلترة */
+    .filter-buttons {
+        display:flex;
+        gap:15px;
+        margin-bottom:30px;
+        flex-wrap:wrap;
+    }
+    .filter-btn {
+        padding:14px 28px;
+        border:none;
+        border-radius:10px;
+        font-size:1.05em;
+        cursor:pointer;
+        transition:all 0.3s ease;
+        font-weight:700;
+        position:relative;
+        overflow:hidden;
+    }
+    .filter-btn::before {
+        content:'';
+        position:absolute;
+        top:50%;
+        left:50%;
+        width:0;
+        height:0;
+        border-radius:50%;
+        background:rgba(255,255,255,0.3);
+        transform:translate(-50%,-50%);
+        transition:width 0.5s,height 0.5s;
+    }
+    .filter-btn:hover::before {
+        width:300px;
+        height:300px;
+    }
+    .filter-btn.active {
+        background:linear-gradient(135deg,#667eea,#764ba2);
+        color:white;
+        box-shadow:0 8px 20px rgba(102,126,234,0.4);
+        transform:translateY(-2px);
+    }
+    .filter-btn:not(.active){
+        background:#f0f0f0;
+        color:#666;
+    }
+    .filter-btn:hover {
+        transform:translateY(-3px);
+        box-shadow:0 5px 15px rgba(0,0,0,0.15);
+    }
+    
+    /* بطاقات الطلبات */
+    .request-card {
+        background:linear-gradient(135deg,#f9f9f9 0%,#fff 100%);
+        padding:30px;
+        border-radius:15px;
+        margin-bottom:25px;
+        border-right:6px solid #667eea;
+        transition:all 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+        box-shadow:0 5px 15px rgba(0,0,0,0.08);
+        position:relative;
+        overflow:hidden;
+    }
+    .request-card::after {
+        content:'';
+        position:absolute;
+        top:0;
+        right:0;
+        width:100px;
+        height:100px;
+        background:radial-gradient(circle,rgba(102,126,234,0.1),transparent);
+        border-radius:50%;
+        transform:translate(50%,-50%);
+    }
+    .request-card.removing {
+        animation:slideOut 0.6s ease forwards;
+    }
+    @keyframes slideOut {
+        0%{opacity:1;transform:translateX(0) scale(1);}
+        100%{opacity:0;transform:translateX(-100px) scale(0.8);height:0;padding:0;margin:0;}
+    }
+    .request-card:hover {
+        box-shadow:0 12px 35px rgba(102,126,234,0.2);
+        transform:translateX(-8px) translateY(-3px);
+        border-right-width:8px;
+    }
+    .request-card.new-request {
+        animation:slideIn 0.6s ease;
+    }
+    @keyframes slideIn {
+        0%{opacity:0;transform:translateX(100px) scale(0.8);}
+        100%{opacity:1;transform:translateX(0) scale(1);}
+    }
+    
     .request-header {
-        flex-direction: column;
-        align-items: flex-start;
+        display:flex;
+        justify-content:space-between;
+        align-items:center;
+        margin-bottom:20px;
+        flex-wrap:wrap;
+        gap:15px;
+    }
+    .student-info h3 {
+        color:#333;
+        font-size:1.6em;
+        margin-bottom:8px;
+        font-weight:700;
+    }
+    .student-info p {
+        color:#666;
+        font-size:1em;
+        font-weight:500;
+    }
+    
+    /* شارات الحالة */
+    .status-badge {
+        padding:10px 25px;
+        border-radius:25px;
+        font-weight:700;
+        font-size:0.95em;
+        box-shadow:0 4px 12px rgba(0,0,0,0.1);
+        animation:pulse 2s infinite;
+    }
+    @keyframes pulse {
+        0%,100%{transform:scale(1);}
+        50%{transform:scale(1.05);}
+    }
+    .status-pending {
+        background:linear-gradient(135deg,#ffeaa7,#fdcb6e);
+        color:#d63031;
+    }
+    .status-approved {
+        background:linear-gradient(135deg,#55efc4,#00b894);
+        color:#00693e;
+    }
+    .status-rejected {
+        background:linear-gradient(135deg,#ff7675,#d63031);
+        color:#fff;
+    }
+    
+    /* تفاصيل الطلب */
+    .request-details {
+        background:white;
+        padding:20px;
+        border-radius:12px;
+        margin-bottom:20px;
+        box-shadow:inset 0 2px 8px rgba(0,0,0,0.05);
     }
     .detail-row {
-        flex-direction: column;
+        display:flex;
+        margin-bottom:12px;
+        font-size:1.05em;
+        padding:8px 0;
+        border-bottom:1px solid #f0f0f0;
+    }
+    .detail-row:last-child {
+        border-bottom:none;
     }
     .detail-label {
-        min-width: auto;
-        margin-bottom: 5px;
+        font-weight:700;
+        color:#667eea;
+        min-width:180px;
     }
+    .detail-value {
+        color:#333;
+        flex:1;
+        font-weight:500;
+    }
+    
+    /* أزرار الإجراءات */
     .action-buttons {
-        flex-direction: column;
+        display:flex;
+        gap:15px;
+        flex-wrap:wrap;
     }
     .btn {
-        width: 100%;
+        padding:14px 35px;
+        border:none;
+        border-radius:10px;
+        font-size:1.05em;
+        cursor:pointer;
+        transition:all 0.3s ease;
+        font-weight:700;
+        box-shadow:0 5px 15px rgba(0,0,0,0.1);
+        position:relative;
+        overflow:hidden;
     }
-    .stats {
-        grid-template-columns: repeat(2, 1fr);
+    .btn::before {
+        content:'';
+        position:absolute;
+        top:50%;
+        left:50%;
+        width:0;
+        height:0;
+        border-radius:50%;
+        background:rgba(255,255,255,0.3);
+        transform:translate(-50%,-50%);
+        transition:width 0.4s,height 0.4s;
     }
-}
+    .btn:hover::before {
+        width:300px;
+        height:300px;
+    }
+    .btn:disabled {
+        opacity:0.5;
+        cursor:not-allowed;
+    }
+    .btn-approve {
+        background:linear-gradient(135deg,#00b894,#00cec9);
+        color:white;
+        flex:1;
+    }
+    .btn-approve:hover:not(:disabled) {
+        background:linear-gradient(135deg,#00a085,#00b8a9);
+        transform:translateY(-3px);
+        box-shadow:0 8px 20px rgba(0,184,148,0.4);
+    }
+    .btn-reject {
+        background:linear-gradient(135deg,#d63031,#e17055);
+        color:white;
+        flex:1;
+    }
+    .btn-reject:hover:not(:disabled) {
+        background:linear-gradient(135deg,#c0281f,#d65643);
+        transform:translateY(-3px);
+        box-shadow:0 8px 20px rgba(214,48,49,0.4);
+    }
+    
+    /* زر التحديث المتحرك */
+    .refresh-btn {
+        position:fixed;
+        bottom:30px;
+        left:30px;
+        width:70px;
+        height:70px;
+        border-radius:50%;
+        background:linear-gradient(135deg,#667eea,#764ba2);
+        color:white;
+        border:none;
+        font-size:1.8em;
+        cursor:pointer;
+        box-shadow:0 8px 25px rgba(102,126,234,0.5);
+        transition:all 0.3s ease;
+        z-index:1000;
+    }
+    .refresh-btn:hover {
+        transform:rotate(180deg) scale(1.15);
+        box-shadow:0 12px 35px rgba(102,126,234,0.6);
+    }
+    .refresh-btn.spinning {
+        animation:spin 1s linear infinite;
+    }
+    @keyframes spin {
+        from{transform:rotate(0deg);}
+        to{transform:rotate(360deg);}
+    }
+    
+    /* Toast الإشعارات */
+    .toast {
+        position:fixed;
+        top:20px;
+        right:20px;
+        background:white;
+        padding:20px 30px;
+        border-radius:12px;
+        box-shadow:0 10px 40px rgba(0,0,0,0.3);
+        z-index:2000;
+        display:none;
+        animation:toastIn 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+        max-width:400px;
+        font-weight:600;
+        font-size:1.05em;
+    }
+    .toast.show {
+        display:block;
+    }
+    .toast.success {
+        border-right:5px solid #00b894;
+    }
+    .toast.error {
+        border-right:5px solid #d63031;
+    }
+    @keyframes toastIn {
+        from{transform:translateX(500px);opacity:0;}
+        to{transform:translateX(0);opacity:1;}
+    }
+    
+    .loading {
+        text-align:center;
+        padding:60px;
+        font-size:1.4em;
+        color:#667eea;
+        font-weight:600;
+    }
+    .loading::after {
+        content:'...';
+        animation:dots 1.5s infinite;
+    }
+    @keyframes dots {
+        0%,20%{content:'.';}
+        40%{content:'..';}
+        60%,100%{content:'...';}
+    }
+    
+    .no-requests {
+        text-align:center;
+        padding:80px;
+        color:#999;
+        font-size:1.4em;
+        font-weight:600;
+    }
+    
+    /* Auto-refresh indicator */
+    .auto-refresh-indicator {
+        position:fixed;
+        bottom:110px;
+        left:30px;
+        background:rgba(102,126,234,0.95);
+        color:white;
+        padding:12px 20px;
+        border-radius:25px;
+        font-size:0.9em;
+        font-weight:600;
+        box-shadow:0 5px 15px rgba(0,0,0,0.2);
+        animation:fadeInOut 2s ease-in-out infinite;
+    }
+    @keyframes fadeInOut {
+        0%,100%{opacity:0.7;}
+        50%{opacity:1;}
+    }
+    
+    @media (max-width:768px){
+        .header h1{font-size:2em;}
+        .school-logo{font-size:3em;}
+        .request-header{flex-direction:column;align-items:flex-start;}
+        .detail-row{flex-direction:column;}
+        .detail-label{min-width:auto;margin-bottom:5px;}
+        .action-buttons{flex-direction:column;}
+        .btn{width:100%;}
+        .stats{grid-template-columns:repeat(2,1fr);}
+    }
 </style>
 </head>
 <body>
-
 <div class="container">
     <div class="header">
         <div class="school-logo">🏫</div>
@@ -529,67 +503,31 @@ body {
     </div>
 </div>
 
-<button class="refresh-btn" onclick="manualRefresh()" title="تحديث البيانات">🔄</button>
+<button class="refresh-btn" onclick="manualRefresh()">🔄</button>
 <div class="auto-refresh-indicator">🔄 تحديث تلقائي كل 10 ثواني</div>
 
 <div id="toast" class="toast">
     <span id="toast-message"></span>
 </div>
 
-<script src="https://apis.google.com/js/api.js"></script>
 <script>
-// ====================================
-// إعدادات النظام
-// ====================================
-const WEBHOOK_URL = 'https://n8n.srv1096584.hstgr.cloud/webhook-test/admin/get-requests';
-const SHEET_ID = '1im7B1quJaICfownQ9Lbky7jDSNCd_N5EYRAx3H_UdRg';
-const API_KEY = 'AIzaSyDHO-g7TeVqGWAYi5xthN_tlPjciLBLPW4'; // ضع Google API Key هنا
+// إعدادات n8n
+const N8N_BASE_URL = 'https://n8n.srv1096584.hstgr.cloud/webhook';
 
-// ====================================
-// المتغيرات العامة
-// ====================================
+// متغيرات عامة
 let allRequests = [];
 let currentFilter = 'all';
 let autoRefreshInterval;
 let previousRequestCount = 0;
-let gapiLoaded = false;
 
-// ====================================
-// تحميل Google API
-// ====================================
-function loadGoogleAPI() {
-    return new Promise((resolve) => {
-        if (typeof gapi !== 'undefined') {
-            gapi.load('client', () => {
-                gapi.client.init({
-                    apiKey: API_KEY,
-                    discoveryDocs: ['https://sheets.googleapis.com/$discovery/rest?version=v4']
-                }).then(() => {
-                    gapiLoaded = true;
-                    console.log('✅ Google API جاهز');
-                    resolve();
-                });
-            });
-        } else {
-            setTimeout(() => loadGoogleAPI().then(resolve), 100);
-        }
-    });
-}
-
-// ====================================
-// تشغيل النظام
-// ====================================
-window.onload = async function() {
-    console.log('🚀 تم تشغيل نظام إدارة الطلبات');
-    await loadGoogleAPI();
+// تشغيل النظام عند تحميل الصفحة
+window.onload = function() {
     loadRequests();
     setupFilters();
     startAutoRefresh();
 };
 
-// ====================================
 // إعداد أزرار الفلترة
-// ====================================
 function setupFilters() {
     document.querySelectorAll('.filter-btn').forEach(btn => {
         btn.addEventListener('click', function() {
@@ -601,9 +539,7 @@ function setupFilters() {
     });
 }
 
-// ====================================
 // فلترة حسب الحالة
-// ====================================
 function filterByStatus(status) {
     currentFilter = status;
     document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
@@ -612,51 +548,34 @@ function filterByStatus(status) {
     displayRequests();
 }
 
-// ====================================
 // بدء التحديث التلقائي
-// ====================================
 function startAutoRefresh() {
     autoRefreshInterval = setInterval(() => {
-        console.log('🔄 تحديث تلقائي...');
         loadRequests(true);
-    }, 10000);
+    }, 10000); // تحديث كل 10 ثواني
 }
 
-// ====================================
 // تحديث يدوي
-// ====================================
 function manualRefresh() {
     const btn = document.querySelector('.refresh-btn');
     btn.classList.add('spinning');
-    console.log('🔄 تحديث يدوي...');
     loadRequests(false).then(() => {
         setTimeout(() => btn.classList.remove('spinning'), 1000);
     });
 }
 
-// ====================================
-// جلب الطلبات من Webhook
-// ====================================
+// جلب الطلبات من n8n
 async function loadRequests(isAuto = false) {
     try {
-        console.log('📡 جاري جلب البيانات من Webhook...');
-        
-        const response = await fetch(WEBHOOK_URL, {
-            method: 'GET',
-            headers: {
-                'Content-Type': 'application/json'
-            }
-        });
+        const response = await fetch(`${N8N_BASE_URL}/get-requests`);
         
         if (!response.ok) {
-            throw new Error(`HTTP error! status: ${response.status}`);
+            throw new Error('فشل في جلب البيانات');
         }
         
         const data = await response.json();
-        console.log('✅ تم استلام البيانات:', data);
         
         if (!data.requests || data.requests.length === 0) {
-            console.log('📭 لا توجد طلبات');
             allRequests = [];
             updateStats();
             displayRequests();
@@ -667,9 +586,8 @@ async function loadRequests(isAuto = false) {
 
         // التحقق من الطلبات الجديدة
         if (isAuto && newRequests.length > previousRequestCount) {
-            const newCount = newRequests.length - previousRequestCount;
-            console.log('🔔 طلبات جديدة:', newCount);
-            showToast(`🔔 ${newCount} طلب جديد وصل!`, 'success');
+            const newRequestsCount = newRequests.length - previousRequestCount;
+            showToast(`🔔 ${newRequestsCount} طلب جديد وصل!`, 'success');
             playNotificationSound();
         }
 
@@ -681,18 +599,14 @@ async function loadRequests(isAuto = false) {
         if (!isAuto) {
             showToast('✅ تم تحديث البيانات بنجاح', 'success');
         }
-        
     } catch (error) {
-        console.error('❌ خطأ في تحميل البيانات:', error);
-        document.getElementById('requests-list').innerHTML = 
-            '<div class="no-requests">❌ حدث خطأ في تحميل البيانات<br><small>تأكد من تشغيل Webhook</small></div>';
+        console.error('خطأ في تحميل البيانات:', error);
+        document.getElementById('requests-list').innerHTML = '<div class="no-requests">❌ حدث خطأ في تحميل البيانات<br><small>تأكد من تشغيل n8n workflow</small></div>';
         showToast('❌ فشل في تحميل البيانات', 'error');
     }
 }
 
-// ====================================
 // تشغيل صوت إشعار
-// ====================================
 function playNotificationSound() {
     try {
         const audioContext = new (window.AudioContext || window.webkitAudioContext)();
@@ -711,13 +625,11 @@ function playNotificationSound() {
         oscillator.start(audioContext.currentTime);
         oscillator.stop(audioContext.currentTime + 0.5);
     } catch (error) {
-        console.log('⚠️ تعذر تشغيل الصوت');
+        console.log('تعذر تشغيل الصوت');
     }
 }
 
-// ====================================
 // تحديث الإحصائيات
-// ====================================
 function updateStats() {
     const total = allRequests.length;
     const pending = allRequests.filter(r => r.status === 'Pending').length;
@@ -730,9 +642,7 @@ function updateStats() {
     document.getElementById('rejected-count').textContent = rejected;
 }
 
-// ====================================
 // عرض الطلبات
-// ====================================
 function displayRequests() {
     const container = document.getElementById('requests-list');
     let filteredRequests = allRequests;
@@ -741,6 +651,7 @@ function displayRequests() {
         filteredRequests = allRequests.filter(r => r.status === currentFilter);
     }
     
+    // ترتيب: الطلبات المعلقة أولاً
     filteredRequests.sort((a, b) => {
         if (a.status === 'Pending' && b.status !== 'Pending') return -1;
         if (a.status !== 'Pending' && b.status === 'Pending') return 1;
@@ -752,8 +663,8 @@ function displayRequests() {
         return;
     }
 
-    container.innerHTML = filteredRequests.map((request, index) => {
-        const statusClass = (request.status || 'pending').toLowerCase();
+    container.innerHTML = filteredRequests.map(request => {
+        const statusClass = request.status.toLowerCase();
         const statusText = {
             'Pending': '⏳ قيد المراجعة',
             'Approved': '✅ تم القبول',
@@ -799,10 +710,10 @@ function displayRequests() {
             </div>
             ${request.status === 'Pending' ? `
             <div class="action-buttons">
-                <button class="btn btn-approve" onclick="updateStatus('approve', '${request.requestId}', ${index + 2})">
+                <button class="btn btn-approve" onclick="updateStatus('approve', '${request.requestId}')">
                     ✅ قبول الطلب
                 </button>
-                <button class="btn btn-reject" onclick="updateStatus('reject', '${request.requestId}', ${index + 2})">
+                <button class="btn btn-reject" onclick="updateStatus('reject', '${request.requestId}')">
                     ❌ رفض الطلب
                 </button>
             </div>` : ''}
@@ -810,39 +721,8 @@ function displayRequests() {
     }).join('');
 }
 
-// ====================================
-// تحديث Google Sheets مباشرة
-// ====================================
-async function updateGoogleSheet(rowNumber, status, adminResponse, responseDate) {
-    if (!gapiLoaded) {
-        throw new Error('Google API لم يتم تحميله بعد');
-    }
-
-    try {
-        const range = `Sheet1!I${rowNumber}:K${rowNumber}`;
-        const values = [[status, adminResponse, responseDate]];
-        
-        const response = await gapi.client.sheets.spreadsheets.values.update({
-            spreadsheetId: SHEET_ID,
-            range: range,
-            valueInputOption: 'RAW',
-            resource: {
-                values: values
-            }
-        });
-        
-        console.log('✅ تم تحديث Google Sheet:', response);
-        return response;
-    } catch (error) {
-        console.error('❌ خطأ في تحديث Google Sheet:', error);
-        throw error;
-    }
-}
-
-// ====================================
 // تحديث حالة الطلب
-// ====================================
-async function updateStatus(action, requestId, rowNumber) {
+async function updateStatus(action, requestId) {
     const card = document.getElementById(`card-${requestId}`);
     const requestIndex = allRequests.findIndex(r => r.requestId === requestId);
     
@@ -860,8 +740,108 @@ async function updateStatus(action, requestId, rowNumber) {
         return;
     }
 
-    // تعطيل الأزرار
+    // تعطيل الأزرار مؤقتاً
     const buttons = card.querySelectorAll('.btn');
     buttons.forEach(btn => btn.disabled = true);
 
-    //
+    // تحديث محلي فوري
+    const newStatus = isApprove ? 'Approved' : 'Rejected';
+    const responseDate = new Date().toLocaleString('ar-SA');
+    
+    allRequests[requestIndex].status = newStatus;
+    allRequests[requestIndex].adminResponse = response || '';
+    allRequests[requestIndex].responseDate = responseDate;
+
+    // تحديث واجهة المستخدم فوراً
+    card.classList.add('removing');
+    setTimeout(() => {
+        updateStats();
+        displayRequests();
+    }, 600);
+
+    // إرسال التحديث لـ n8n
+    try {
+        const updateResponse = await fetch(`${N8N_BASE_URL}/update-request`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({
+                requestId: requestId,
+                status: newStatus,
+                adminResponse: response || '',
+                responseDate: responseDate,
+                phone: allRequests[requestIndex].phone,
+                studentName: allRequests[requestIndex].studentName,
+                studentId: allRequests[requestIndex].studentId,
+                grade: allRequests[requestIndex].grade,
+                section: allRequests[requestIndex].section,
+                reason: allRequests[requestIndex].reason
+            })
+        });
+        
+        if (updateResponse.ok) {
+            showToast(
+                isApprove ? '✅ تم قبول الطلب وإرسال إشعار WhatsApp' : '❌ تم رفض الطلب وإرسال إشعار WhatsApp',
+                'success'
+            );
+            playNotificationSound();
+        } else {
+            throw new Error('فشل في تحديث الطلب');
+        }
+    } catch (error) {
+        console.error('خطأ في تحديث الطلب:', error);
+        showToast('⚠️ حدث خطأ في إرسال الإشعار، جاري إعادة المحاولة...', 'error');
+        
+        // إعادة المحاولة بعد 3 ثواني
+        setTimeout(async () => {
+            try {
+                const retryResponse = await fetch(`${N8N_BASE_URL}/update-request`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        requestId: requestId,
+                        status: newStatus,
+                        adminResponse: response || '',
+                        responseDate: responseDate,
+                        phone: allRequests[requestIndex].phone,
+                        studentName: allRequests[requestIndex].studentName,
+                        studentId: allRequests[requestIndex].studentId,
+                        grade: allRequests[requestIndex].grade,
+                        section: allRequests[requestIndex].section,
+                        reason: allRequests[requestIndex].reason
+                    })
+                });
+                
+                if (retryResponse.ok) {
+                    showToast('✅ تم إرسال الإشعار بنجاح', 'success');
+                    playNotificationSound();
+                } else {
+                    showToast('❌ فشل في إرسال الإشعار بعد المحاولة الثانية', 'error');
+                }
+            } catch (retryError) {
+                console.error('فشلت إعادة المحاولة:', retryError);
+                showToast('❌ فشل في إرسال الإشعار نهائياً', 'error');
+            }
+        }, 3000);
+    }
+}
+
+// عرض Toast
+function showToast(msg, type = 'success') {
+    const toast = document.getElementById('toast');
+    document.getElementById('toast-message').textContent = msg;
+    toast.className = `toast ${type} show`;
+    setTimeout(() => {
+        toast.classList.remove('show');
+    }, 4000);
+}
+
+// تنظيف عند إغلاق الصفحة
+window.onbeforeunload = function() {
+    if (autoRefreshInterval) {
+        clearInterval(autoRefreshInterval);
+    }
+};
