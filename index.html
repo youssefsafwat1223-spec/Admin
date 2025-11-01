@@ -542,8 +542,8 @@ body {
 // إعدادات النظام
 // ====================================
 const WEBHOOK_URL = 'https://n8n.srv1096584.hstgr.cloud/webhook/admin/get-requests';
-const UPDATE_WEBHOOK_URL = 'https://n8n.srv1096584.hstgr.cloud/webhook/admin/update-request';
 const SHEET_ID = '1im7B1quJaICfownQ9Lbky7jDSNCd_N5EYRAx3H_UdRg';
+const API_KEY = 'AIzaSyDKkv4Lx6uaSwz5k14wbDdmXF2cqYBJ7rk'; // ضع Google API Key هنا
 
 // ====================================
 // المتغيرات العامة
@@ -864,94 +864,4 @@ async function updateStatus(action, requestId, rowNumber) {
     const buttons = card.querySelectorAll('.btn');
     buttons.forEach(btn => btn.disabled = true);
 
-    // تحديث محلي فوري
-    const newStatus = isApprove ? 'Approved' : 'Rejected';
-    const responseDate = new Date().toLocaleString('ar-SA');
-    
-    allRequests[requestIndex].status = newStatus;
-    allRequests[requestIndex].adminResponse = response || '';
-    allRequests[requestIndex].responseDate = responseDate;
-
-    // تحديث واجهة المستخدم فوراً
-    card.classList.add('removing');
-    setTimeout(() => {
-        updateStats();
-        displayRequests();
-    }, 600);
-
-    // تحديث Google Sheets مباشرة
-    try {
-        console.log('📤 تحديث Google Sheet مباشرة...');
-        console.log('📍 رقم الصف:', rowNumber);
-        
-        await updateGoogleSheet(rowNumber, newStatus, response || '', responseDate);
-        
-        showToast(
-            isApprove ? '✅ تم قبول الطلب وتحديث الجدول' : '❌ تم رفض الطلب وتحديث الجدول',
-            'success'
-        );
-        playNotificationSound();
-        
-        // إعادة تحميل البيانات بعد ثانيتين للتأكد
-        setTimeout(() => loadRequests(false), 2000);
-        
-    } catch (error) {
-        console.error('❌ خطأ في تحديث Google Sheet:', error);
-        showToast('⚠️ حدث خطأ في تحديث الجدول، جاري إعادة المحاولة...', 'error');
-        
-        // إعادة المحاولة بعد 3 ثواني
-        setTimeout(async () => {
-            try {
-                console.log('🔄 إعادة المحاولة...');
-                await updateGoogleSheet(rowNumber, newStatus, response || '', responseDate);
-                showToast('✅ تم تحديث الجدول بنجاح', 'success');
-                playNotificationSound();
-                setTimeout(() => loadRequests(false), 2000);
-            } catch (retryError) {
-                console.error('❌ فشلت إعادة المحاولة:', retryError);
-                showToast('❌ فشل في تحديث الجدول نهائياً', 'error');
-            }
-        }, 3000);
-    }
-}
-
-// ====================================
-// عرض Toast الإشعارات
-// ====================================
-function showToast(msg, type = 'success') {
-    const toast = document.getElementById('toast');
-    document.getElementById('toast-message').textContent = msg;
-    toast.className = `toast ${type} show`;
-    setTimeout(() => {
-        toast.classList.remove('show');
-    }, 4000);
-}
-
-// ====================================
-// تنظيف عند إغلاق الصفحة
-// ====================================
-window.onbeforeunload = function() {
-    if (autoRefreshInterval) {
-        clearInterval(autoRefreshInterval);
-        console.log('🛑 تم إيقاف التحديث التلقائي');
-    }
-};
-
-// ====================================
-// رسالة تأكيد التشغيل
-// ====================================
-console.log(`
-╔═══════════════════════════════════════════════════╗
-║   🏫 نظام إدارة طلبات الاستئذان المدرسي         ║
-║                                                   ║
-║   ✅ تم تشغيل النظام بنجاح                       ║
-║   📡 جلب البيانات: Webhook                       ║
-║   💾 التحديث: Google Sheets مباشرة               ║
-║   🔄 تحديث تلقائي: كل 10 ثواني                  ║
-║                                                   ║
-╚═══════════════════════════════════════════════════╝
-`);
-
-</script>
-</body>
-</html>
+    //
