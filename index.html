@@ -24,7 +24,6 @@ body {
     margin: 0 auto;
 }
 
-/* Header */
 .header {
     background: linear-gradient(135deg, #fff 0%, #f8f9fa 100%);
     padding: 40px;
@@ -80,7 +79,6 @@ body {
     font-weight: 500;
 }
 
-/* Stats Cards */
 .stats {
     display: grid;
     grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
@@ -97,23 +95,6 @@ body {
     cursor: pointer;
     transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
     border-top: 4px solid #667eea;
-    position: relative;
-    overflow: hidden;
-}
-
-.stat-card::before {
-    content: '';
-    position: absolute;
-    top: 0;
-    left: -100%;
-    width: 100%;
-    height: 100%;
-    background: linear-gradient(90deg, transparent, rgba(102,126,234,0.1), transparent);
-    transition: 0.5s;
-}
-
-.stat-card:hover::before {
-    left: 100%;
 }
 
 .stat-card:hover {
@@ -134,7 +115,6 @@ body {
     font-weight: 600;
 }
 
-/* Requests Container */
 .requests-container {
     background: white;
     padding: 35px;
@@ -142,7 +122,6 @@ body {
     box-shadow: 0 15px 40px rgba(0,0,0,0.2);
 }
 
-/* Filter Buttons */
 .filter-buttons {
     display: flex;
     gap: 15px;
@@ -158,8 +137,6 @@ body {
     cursor: pointer;
     transition: all 0.3s ease;
     font-weight: 700;
-    position: relative;
-    overflow: hidden;
 }
 
 .filter-btn.active {
@@ -179,7 +156,6 @@ body {
     box-shadow: 0 5px 15px rgba(0,0,0,0.15);
 }
 
-/* Request Cards */
 .request-card {
     background: linear-gradient(135deg, #f9f9f9 0%, #fff 100%);
     padding: 30px;
@@ -188,8 +164,6 @@ body {
     border-right: 6px solid #667eea;
     transition: all 0.5s ease;
     box-shadow: 0 5px 15px rgba(0,0,0,0.08);
-    position: relative;
-    overflow: hidden;
 }
 
 .request-card.removing {
@@ -237,7 +211,6 @@ body {
     font-weight: 500;
 }
 
-/* Status Badge */
 .status-badge {
     padding: 10px 25px;
     border-radius: 25px;
@@ -261,7 +234,6 @@ body {
     color: #fff;
 }
 
-/* Request Details */
 .request-details {
     background: white;
     padding: 20px;
@@ -294,7 +266,6 @@ body {
     font-weight: 500;
 }
 
-/* Action Buttons */
 .action-buttons {
     display: flex;
     gap: 15px;
@@ -341,7 +312,6 @@ body {
     box-shadow: 0 8px 20px rgba(214,48,49,0.4);
 }
 
-/* Refresh Button */
 .refresh-btn {
     position: fixed;
     bottom: 30px;
@@ -373,7 +343,6 @@ body {
     to { transform: rotate(360deg); }
 }
 
-/* Toast Notifications */
 .toast {
     position: fixed;
     top: 20px;
@@ -413,24 +382,12 @@ body {
     }
 }
 
-/* Loading & No Requests */
 .loading {
     text-align: center;
     padding: 60px;
     font-size: 1.4em;
     color: #667eea;
     font-weight: 600;
-}
-
-.loading::after {
-    content: '...';
-    animation: dots 1.5s infinite;
-}
-
-@keyframes dots {
-    0%, 20% { content: '.'; }
-    40% { content: '..'; }
-    60%, 100% { content: '...'; }
 }
 
 .no-requests {
@@ -441,7 +398,6 @@ body {
     font-weight: 600;
 }
 
-/* Auto-refresh Indicator */
 .auto-refresh-indicator {
     position: fixed;
     bottom: 110px;
@@ -461,7 +417,6 @@ body {
     50% { opacity: 1; }
 }
 
-/* Responsive */
 @media (max-width: 768px) {
     .header h1 { font-size: 2em; }
     .school-logo { font-size: 3em; }
@@ -491,14 +446,12 @@ body {
 <body>
 
 <div class="container">
-    <!-- Header -->
     <div class="header">
         <div class="school-logo">🏫</div>
         <h1>نظام إدارة طلبات الاستئذان</h1>
         <p>إدارة ومراجعة طلبات الاستئذان بشكل فوري ومباشر</p>
     </div>
 
-    <!-- Statistics Cards -->
     <div class="stats">
         <div class="stat-card" onclick="filterByStatus('all')">
             <h3 id="total-count">0</h3>
@@ -518,7 +471,6 @@ body {
         </div>
     </div>
 
-    <!-- Requests Container -->
     <div class="requests-container">
         <div class="filter-buttons">
             <button class="filter-btn active" data-filter="all">📋 جميع الطلبات</button>
@@ -532,34 +484,21 @@ body {
     </div>
 </div>
 
-<!-- Refresh Button -->
 <button class="refresh-btn" onclick="manualRefresh()" title="تحديث البيانات">🔄</button>
-
-<!-- Auto-refresh Indicator -->
 <div class="auto-refresh-indicator">🔄 تحديث تلقائي كل 10 ثواني</div>
 
-<!-- Toast Notification -->
 <div id="toast" class="toast">
     <span id="toast-message"></span>
 </div>
 
 <script>
-// ====================================
-// إعدادات النظام
-// ====================================
 const N8N_BASE_URL = 'https://n8n.srv1096584.hstgr.cloud/webhook/admin';
 
-// ====================================
-// المتغيرات العامة
-// ====================================
 let allRequests = [];
 let currentFilter = 'all';
 let autoRefreshInterval;
 let previousRequestCount = 0;
 
-// ====================================
-// تشغيل النظام
-// ====================================
 window.onload = function() {
     console.log('🚀 تم تشغيل نظام إدارة الطلبات');
     loadRequests();
@@ -567,9 +506,6 @@ window.onload = function() {
     startAutoRefresh();
 };
 
-// ====================================
-// إعداد أزرار الفلترة
-// ====================================
 function setupFilters() {
     document.querySelectorAll('.filter-btn').forEach(btn => {
         btn.addEventListener('click', function() {
@@ -581,9 +517,6 @@ function setupFilters() {
     });
 }
 
-// ====================================
-// فلترة حسب الحالة
-// ====================================
 function filterByStatus(status) {
     currentFilter = status;
     document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
@@ -592,19 +525,13 @@ function filterByStatus(status) {
     displayRequests();
 }
 
-// ====================================
-// بدء التحديث التلقائي
-// ====================================
 function startAutoRefresh() {
     autoRefreshInterval = setInterval(() => {
         console.log('🔄 تحديث تلقائي...');
         loadRequests(true);
-    }, 10000); // كل 10 ثواني
+    }, 10000);
 }
 
-// ====================================
-// تحديث يدوي
-// ====================================
 function manualRefresh() {
     const btn = document.querySelector('.refresh-btn');
     btn.classList.add('spinning');
@@ -614,9 +541,6 @@ function manualRefresh() {
     });
 }
 
-// ====================================
-// جلب الطلبات من n8n
-// ====================================
 async function loadRequests(isAuto = false) {
     try {
         console.log('📡 جاري جلب البيانات من:', N8N_BASE_URL + '/get-requests');
@@ -645,12 +569,10 @@ async function loadRequests(isAuto = false) {
 
         const newRequests = data.requests;
 
-        // التحقق من الطلبات الجديدة
         if (isAuto && newRequests.length > previousRequestCount) {
             const newCount = newRequests.length - previousRequestCount;
             console.log('🔔 طلبات جديدة:', newCount);
             showToast(`🔔 ${newCount} طلب جديد وصل!`, 'success');
-            playNotificationSound();
         }
 
         previousRequestCount = newRequests.length;
@@ -670,34 +592,6 @@ async function loadRequests(isAuto = false) {
     }
 }
 
-// ====================================
-// تشغيل صوت إشعار
-// ====================================
-function playNotificationSound() {
-    try {
-        const audioContext = new (window.AudioContext || window.webkitAudioContext)();
-        const oscillator = audioContext.createOscillator();
-        const gainNode = audioContext.createGain();
-        
-        oscillator.connect(gainNode);
-        gainNode.connect(audioContext.destination);
-        
-        oscillator.frequency.value = 800;
-        oscillator.type = 'sine';
-        
-        gainNode.gain.setValueAtTime(0.3, audioContext.currentTime);
-        gainNode.gain.exponentialRampToValueAtTime(0.01, audioContext.currentTime + 0.5);
-        
-        oscillator.start(audioContext.currentTime);
-        oscillator.stop(audioContext.currentTime + 0.5);
-    } catch (error) {
-        console.log('⚠️ تعذر تشغيل الصوت');
-    }
-}
-
-// ====================================
-// تحديث الإحصائيات
-// ====================================
 function updateStats() {
     const total = allRequests.length;
     const pending = allRequests.filter(r => r.status === 'Pending').length;
@@ -710,9 +604,6 @@ function updateStats() {
     document.getElementById('rejected-count').textContent = rejected;
 }
 
-// ====================================
-// عرض الطلبات
-// ====================================
 function displayRequests() {
     const container = document.getElementById('requests-list');
     let filteredRequests = allRequests;
@@ -721,7 +612,6 @@ function displayRequests() {
         filteredRequests = allRequests.filter(r => r.status === currentFilter);
     }
     
-    // ترتيب: الطلبات المعلقة أولاً
     filteredRequests.sort((a, b) => {
         if (a.status === 'Pending' && b.status !== 'Pending') return -1;
         if (a.status !== 'Pending' && b.status === 'Pending') return 1;
@@ -791,9 +681,6 @@ function displayRequests() {
     }).join('');
 }
 
-// ====================================
-// تحديث حالة الطلب
-// ====================================
 async function updateStatus(action, requestId) {
     const card = document.getElementById(`card-${requestId}`);
     const requestIndex = allRequests.findIndex(r => r.requestId === requestId);
@@ -812,11 +699,9 @@ async function updateStatus(action, requestId) {
         return;
     }
 
-    // تعطيل الأزرار مؤقتاً
     const buttons = card.querySelectorAll('.btn');
     buttons.forEach(btn => btn.disabled = true);
 
-    // تحديث محلي فوري
     const newStatus = isApprove ? 'Approved' : 'Rejected';
     const responseDate = new Date().toLocaleString('ar-SA');
     
@@ -824,14 +709,12 @@ async function updateStatus(action, requestId) {
     allRequests[requestIndex].adminResponse = response || '';
     allRequests[requestIndex].responseDate = responseDate;
 
-    // تحديث واجهة المستخدم فوراً
     card.classList.add('removing');
     setTimeout(() => {
         updateStats();
         displayRequests();
     }, 600);
 
-    // إرسال التحديث لـ n8n
     try {
         console.log('📤 إرسال التحديث إلى n8n...');
         
@@ -864,57 +747,15 @@ async function updateStatus(action, requestId) {
                 isApprove ? '✅ تم قبول الطلب وإرسال إشعار WhatsApp' : '❌ تم رفض الطلب وإرسال إشعار WhatsApp',
                 'success'
             );
-            playNotificationSound();
         } else {
             throw new Error(`HTTP error! status: ${updateResponse.status}`);
         }
     } catch (error) {
         console.error('❌ خطأ في تحديث الطلب:', error);
-        showToast('⚠️ حدث خطأ في إرسال الإشعار، جاري إعادة المحاولة...', 'error');
-        
-        // إعادة المحاولة بعد 3 ثواني
-        setTimeout(async () => {
-            try {
-                console.log('🔄 إعادة المحاولة...');
-                
-                const retryResponse = await fetch(N8N_BASE_URL + '/update-request', {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                    },
-                    body: JSON.stringify({
-                        requestId: requestId,
-                        status: newStatus,
-                        adminResponse: response || '',
-                        responseDate: responseDate,
-                        phone: allRequests[requestIndex].phone,
-                        studentName: allRequests[requestIndex].studentName,
-                        studentId: allRequests[requestIndex].studentId,
-                        grade: allRequests[requestIndex].grade,
-                        section: allRequests[requestIndex].section,
-                        reason: allRequests[requestIndex].reason
-                    })
-                });
-                
-                if (retryResponse.ok) {
-                    console.log('✅ نجحت إعادة المحاولة');
-                    showToast('✅ تم إرسال الإشعار بنجاح', 'success');
-                    playNotificationSound();
-                } else {
-                    console.error('❌ فشلت إعادة المحاولة');
-                    showToast('❌ فشل في إرسال الإشعار بعد المحاولة الثانية', 'error');
-                }
-            } catch (retryError) {
-                console.error('❌ خطأ في إعادة المحاولة:', retryError);
-                showToast('❌ فشل في إرسال الإشعار نهائياً', 'error');
-            }
-        }, 3000);
+        showToast('⚠️ حدث خطأ في إرسال الإشعار', 'error');
     }
 }
 
-// ====================================
-// عرض Toast الإشعارات
-// ====================================
 function showToast(msg, type = 'success') {
     const toast = document.getElementById('toast');
     document.getElementById('toast-message').textContent = msg;
@@ -924,9 +765,6 @@ function showToast(msg, type = 'success') {
     }, 4000);
 }
 
-// ====================================
-// تنظيف عند إغلاق الصفحة
-// ====================================
 window.onbeforeunload = function() {
     if (autoRefreshInterval) {
         clearInterval(autoRefreshInterval);
@@ -934,9 +772,6 @@ window.onbeforeunload = function() {
     }
 };
 
-// ====================================
-// رسالة تأكيد التشغيل
-// ====================================
 console.log(`
 ╔═══════════════════════════════════════════════════╗
 ║   🏫 نظام إدارة طلبات الاستئذان المدرسي         ║
