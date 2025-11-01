@@ -57,6 +57,7 @@
             box-shadow: 0 5px 15px rgba(0,0,0,0.1);
             text-align: center;
             transition: transform 0.3s;
+            cursor: pointer;
         }
 
         .stat-card:hover {
@@ -119,7 +120,16 @@
             border-radius: 12px;
             margin-bottom: 20px;
             border-right: 5px solid #667eea;
-            transition: all 0.3s;
+            transition: all 0.5s;
+        }
+
+        .request-card.removing {
+            opacity: 0;
+            transform: translateX(-100px);
+            height: 0;
+            padding: 0;
+            margin: 0;
+            overflow: hidden;
         }
 
         .request-card:hover {
@@ -209,12 +219,17 @@
             font-weight: bold;
         }
 
+        .btn:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+
         .btn-approve {
             background: #00b894;
             color: white;
         }
 
-        .btn-approve:hover {
+        .btn-approve:hover:not(:disabled) {
             background: #00a085;
             transform: translateY(-2px);
             box-shadow: 0 5px 15px rgba(0,184,148,0.3);
@@ -225,7 +240,7 @@
             color: white;
         }
 
-        .btn-reject:hover {
+        .btn-reject:hover:not(:disabled) {
             background: #c0281f;
             transform: translateY(-2px);
             box-shadow: 0 5px 15px rgba(214,48,49,0.3);
@@ -343,6 +358,42 @@
             transform: rotate(180deg) scale(1.1);
         }
 
+        .toast {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            background: white;
+            padding: 20px 30px;
+            border-radius: 10px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+            z-index: 2000;
+            display: none;
+            animation: toastIn 0.3s ease;
+        }
+
+        .toast.show {
+            display: block;
+        }
+
+        .toast.success {
+            border-right: 4px solid #00b894;
+        }
+
+        .toast.error {
+            border-right: 4px solid #d63031;
+        }
+
+        @keyframes toastIn {
+            from {
+                transform: translateX(400px);
+                opacity: 0;
+            }
+            to {
+                transform: translateX(0);
+                opacity: 1;
+            }
+        }
+
         @media (max-width: 768px) {
             .header h1 {
                 font-size: 1.8em;
@@ -372,19 +423,19 @@
         </div>
 
         <div class="stats">
-            <div class="stat-card">
+            <div class="stat-card" onclick="filterByStatus('all')">
                 <h3 id="total-count">0</h3>
                 <p>📋 إجمالي الطلبات</p>
             </div>
-            <div class="stat-card">
+            <div class="stat-card" onclick="filterByStatus('Pending')">
                 <h3 id="pending-count">0</h3>
                 <p>⏳ قيد المراجعة</p>
             </div>
-            <div class="stat-card">
+            <div class="stat-card" onclick="filterByStatus('Approved')">
                 <h3 id="approved-count">0</h3>
                 <p>✅ تم القبول</p>
             </div>
-            <div class="stat-card">
+            <div class="stat-card" onclick="filterByStatus('Rejected')">
                 <h3 id="rejected-count">0</h3>
                 <p>❌ تم الرفض</p>
             </div>
@@ -417,8 +468,11 @@
         </div>
     </div>
 
+    <div id="toast" class="toast">
+        <span id="toast-message"></span>
+    </div>
+
     <script>
-        // ⚠️ غيّر الرابط بـ n8n Webhook URL
         const N8N_API_URL = 'https://n8n.srv1096584.hstgr.cloud/webhook';
 
         let allRequests = [];
@@ -440,6 +494,14 @@
                     displayRequests();
                 });
             });
+        }
+
+        function filterByStatus(status) {
+            currentFilter = status;
+            document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
+            const btn = document.querySelector(`[data-filter="${status}"]`);
+            if (btn) btn.classList.add('active');
+            displayRequests();
         }
 
         async function loadRequests() {
@@ -476,7 +538,6 @@
                 filteredRequests = allRequests.filter(r => r.status === currentFilter);
             }
 
-            // ترتيب الطلبات: Pending أولاً
             filteredRequests.sort((a, b) => {
                 if (a.status === 'Pending' && b.status !== 'Pending') return -1;
                 if (a.status !== 'Pending' && b.status === 'Pending') return 1;
@@ -497,7 +558,7 @@
                 }[request.status] || request.status;
 
                 return `
-                    <div class="request-card">
+                    <div class="request-card" id="card-${request.requestId}">
                         <div class="request-header">
                             <div class="student-info">
                                 <h3>👤 ${request.studentName}</h3>
@@ -583,9 +644,14 @@
             const response = textarea.value.trim();
 
             if (currentAction === 'reject' && !response) {
-                alert('⚠️ سبب الرفض إجباري');
+                showToast('⚠️ سبب الرفض إجباري', 'error');
                 return;
             }
+
+            // تعطيل الأزرار أثناء المعالجة
+            const card = document.getElementById(`card-${currentRequestId}`);
+            const buttons = card.querySelectorAll('.btn');
+            buttons.forEach(btn => btn.disabled = true);
 
             try {
                 const result = await fetch(N8N_API_URL + '/admin/update-request', {
@@ -599,16 +665,52 @@
                 });
 
                 if (result.ok) {
-                    alert(currentAction === 'approve' ? '✅ تم قبول الطلب وإرسال الإشعار' : '❌ تم رفض الطلب وإرسال الإشعار');
+                    // تحديث الحالة محلياً
+                    const requestIndex = allRequests.findIndex(r => r.requestId === currentRequestId);
+                    if (requestIndex !== -1) {
+                        allRequests[requestIndex].status = currentAction === 'approve' ? 'Approved' : 'Rejected';
+                        allRequests[requestIndex].adminResponse = response;
+                        allRequests[requestIndex].responseDate = new Date().toISOString();
+                    }
+
+                    // إخفاء الكارد بأنيميشن
+                    card.classList.add('removing');
+                    
+                    setTimeout(() => {
+                        // تحديث الإحصائيات والعرض
+                        updateStats();
+                        displayRequests();
+                        
+                        showToast(
+                            currentAction === 'approve' ? 
+                            '✅ تم قبول الطلب وإرسال الإشعار' : 
+                            '❌ تم رفض الطلب وإرسال الإشعار',
+                            'success'
+                        );
+                    }, 500);
+
                     closeModal();
-                    loadRequests();
                 } else {
-                    alert('❌ حدث خطأ في التحديث');
+                    showToast('❌ حدث خطأ في التحديث', 'error');
+                    buttons.forEach(btn => btn.disabled = false);
                 }
             } catch (error) {
                 console.error('خطأ:', error);
-                alert('❌ حدث خطأ في الاتصال');
+                showToast('❌ حدث خطأ في الاتصال', 'error');
+                buttons.forEach(btn => btn.disabled = false);
             }
+        }
+
+        function showToast(message, type = 'success') {
+            const toast = document.getElementById('toast');
+            const toastMessage = document.getElementById('toast-message');
+            
+            toastMessage.textContent = message;
+            toast.className = `toast ${type} show`;
+            
+            setTimeout(() => {
+                toast.classList.remove('show');
+            }, 3000);
         }
     </script>
 </body>
